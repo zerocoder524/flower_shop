@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Каталог цветов
+{% endblock %}
+
+{% block content %}
+<section>
+    <h1 class="page-title">
+        Каталог цветов
+    </h1>
+
+    <p class="page-description">
+        Выберите букет и перейдите к оформлению доставки.
+    </p>
+
+    {% if products %}
+        <div class="product-grid">
+            {% for product in products %}
+                <article class="product-card">
+                    <a
+                        class="product-card-image-link"
+                        href="{% url 'catalog:product_detail' product.pk %}"
+                    >
+                        {% if product.image %}
+                            <img
+                                class="product-image"
+                                src="{{ product.image.url }}"
+                                alt="{{ product.name }}"
+                            >
+                        {% else %}
+                            <div class="product-placeholder">
+                                Нет фотографии
+                            </div>
+                        {% endif %}
+                    </a>
+
+                    <div class="product-card-content">
+                        <h2 class="product-title">
+                            <a
+                                href="{% url 'catalog:product_detail' product.pk %}"
+                            >
+                                {{ product.name }}
+                            </a>
+                        </h2>
+
+                        <p class="product-description">
+                            {{ product.description|truncatewords:20 }}
+                        </p>
+
+                        <p class="product-price">
+                            {{ product.price|floatformat:2 }} ₽
+                        </p>
+
+                        <a
+                            class="button"
+                            href="{% url 'catalog:product_detail' product.pk %}"
+                        >
+                            Подробнее
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-catalog">
+            <p>
+                В каталоге пока нет доступных товаров.
+            </p>
+
+            {% if user.is_staff %}
+                <a
+                    class="button"
+                    href="/admin/catalog/product/add/"
+                >
+                    Добавить товар
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

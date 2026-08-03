@@ -140,3 +140,17 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = "users:login"
+LOGIN_REDIRECT_URL = "catalog:product_list"
+LOGOUT_REDIRECT_URL = "catalog:product_list"
+
+SHOP_OPEN_TIME = os.getenv(
+    "SHOP_OPEN_TIME",
+    "09:00",
+)
+
+SHOP_CLOSE_TIME = os.getenv(
+    "SHOP_CLOSE_TIME",
+    "20:00",
+)

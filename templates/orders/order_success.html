@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Заказ оформлен
+{% endblock %}
+
+{% block content %}
+<section class="success-card">
+    <h1>Заказ успешно оформлен</h1>
+
+    <p>
+        Номер заказа:
+        <strong>№{{ order.pk }}</strong>
+    </p>
+
+    <dl class="order-summary">
+        <dt>Букет</dt>
+        <dd>{{ order.product.name }}</dd>
+
+        <dt>Количество</dt>
+        <dd>{{ order.quantity }}</dd>
+
+        <dt>Получатель</dt>
+        <dd>
+            {{ order.recipient_name|default:order.customer_name }}
+        </dd>
+
+        <dt>Адрес</dt>
+        <dd>{{ order.delivery_address }}</dd>
+
+        <dt>Дата доставки</dt>
+        <dd>{{ order.delivery_date }}</dd>
+
+        <dt>Время доставки</dt>
+        <dd>{{ order.delivery_time }}</dd>
+
+        <dt>Итоговая стоимость</dt>
+        <dd>{{ order.total_price }} ₽</dd>
+
+        <dt>Статус</dt>
+        <dd>{{ order.get_status_display }}</dd>
+    </dl>
+
+    <a
+        class="button"
+        href="{% url 'catalog:product_list' %}"
+    >
+        Вернуться в каталог
+    </a>
+</section>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Вход
+{% endblock %}
+
+{% block content %}
+<section class="form-section">
+    <h1>Вход</h1>
+
+    {% if form.errors %}
+        <div class="field-error">
+            Неверный логин или пароль.
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-field">
+            <label for="{{ form.username.id_for_label }}">
+                Логин
+            </label>
+
+            {{ form.username }}
+        </div>
+
+        <div class="form-field">
+            <label for="{{ form.password.id_for_label }}">
+                Пароль
+            </label>
+
+            {{ form.password }}
+        </div>
+
+        {% if next %}
+            <input
+                type="hidden"
+                name="next"
+                value="{{ next }}"
+            >
+        {% endif %}
+
+        <button class="button" type="submit">
+            Войти
+        </button>
+    </form>
+
+    <p>
+        Нет аккаунта?
+        <a href="{% url 'users:register' %}">
+            Зарегистрироваться
+        </a>
+    </p>
+</section>
+{% endblock %}

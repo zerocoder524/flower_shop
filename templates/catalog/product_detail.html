@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ product.name }}
+{% endblock %}
+
+{% block content %}
+<section class="product-detail">
+    <div>
+        {% if product.image %}
+            <img
+                class="product-detail-image"
+                src="{{ product.image.url }}"
+                alt="{{ product.name }}"
+            >
+        {% else %}
+            <div class="image-placeholder large">
+                Нет фотографии
+            </div>
+        {% endif %}
+    </div>
+
+    <div>
+        <h1>{{ product.name }}</h1>
+
+        <div class="product-description">
+            {{ product.description|linebreaks }}
+        </div>
+
+        <p class="price">
+            {{ product.price }} ₽
+        </p>
+
+        {% if user.is_authenticated %}
+            <a
+                class="button"
+                href="{% url 'orders:order_create' product.pk %}"
+            >
+                Заказать
+            </a>
+        {% else %}
+            <a
+                class="button"
+                href="{% url 'users:login' %}?next={% url 'orders:order_create' product.pk %}"
+            >
+                Войти и заказать
+            </a>
+        {% endif %}
+
+        <p>
+            <a href="{% url 'catalog:product_list' %}">
+                Вернуться в каталог
+            </a>
+        </p>
+    </div>
+</section>
+{% endblock %}
