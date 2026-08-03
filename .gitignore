@@ -1,0 +1,26 @@
+# Виртуальное окружение
+.venv/
+
+# Секретные настройки
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Django
+db.sqlite3
+media/
+
+# Журналы
+*.log
+
+# Редакторы
+.idea/
+.vscode/
+
+# Windows
+Thumbs.db
+desktop.ini
