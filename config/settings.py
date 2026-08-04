@@ -154,3 +154,30 @@ SHOP_CLOSE_TIME = os.getenv(
     "SHOP_CLOSE_TIME",
     "20:00",
 )
+
+TELEGRAM_BOT_TOKEN = os.getenv(
+    "TELEGRAM_BOT_TOKEN",
+    "",
+).strip()
+
+TELEGRAM_CHAT_ID = os.getenv(
+    "TELEGRAM_CHAT_ID",
+    "",
+).strip()
+
+TELEGRAM_NOTIFICATIONS_ENABLED = (
+    os.getenv(
+        "TELEGRAM_NOTIFICATIONS_ENABLED",
+        "False",
+    )
+    .strip()
+    .lower()
+    in {"1", "true", "yes", "on"}
+)
+
+TELEGRAM_API_TIMEOUT = int(
+    os.getenv(
+        "TELEGRAM_API_TIMEOUT",
+        "10",
+    )
+)

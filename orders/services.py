@@ -16,7 +16,13 @@ def parse_time_setting(
     value: str,
     default: str,
 ) -> time:
-    """Преобразует строку 09:00 в объект time."""
+    """
+    Преобразует строку времени формата 09:00
+    в объект datetime.time.
+
+    При неправильном значении использует значение
+    по умолчанию.
+    """
 
     try:
         return time.fromisoformat(value)
@@ -25,13 +31,27 @@ def parse_time_setting(
 
 
 def get_shop_hours() -> tuple[time, time]:
+    """Возвращает время открытия и закрытия магазина."""
+
+    open_time_value = getattr(
+        settings,
+        "SHOP_OPEN_TIME",
+        "09:00",
+    )
+
+    close_time_value = getattr(
+        settings,
+        "SHOP_CLOSE_TIME",
+        "20:00",
+    )
+
     open_time = parse_time_setting(
-        settings.SHOP_OPEN_TIME,
+        open_time_value,
         "09:00",
     )
 
     close_time = parse_time_setting(
-        settings.SHOP_CLOSE_TIME,
+        close_time_value,
         "20:00",
     )
 
@@ -39,7 +59,12 @@ def get_shop_hours() -> tuple[time, time]:
 
 
 def is_shop_open(now=None) -> bool:
-    """Проверяет, принимает ли магазин заказы."""
+    """
+    Проверяет, принимает ли магазин заказы
+    в указанный момент времени.
+
+    Если now не передан, используется текущее время.
+    """
 
     current_datetime = timezone.localtime(
         now or timezone.now()
@@ -51,13 +76,34 @@ def is_shop_open(now=None) -> bool:
 
     open_time, close_time = get_shop_hours()
 
+    # Обычный график, например с 09:00 до 20:00.
     if open_time <= close_time:
         return open_time <= current_time <= close_time
 
-    # Поддержка графика, переходящего через полночь.
+    # График, переходящий через полночь,
+    # например с 20:00 до 02:00.
     return (
         current_time >= open_time
         or current_time <= close_time
+    )
+
+
+def schedule_order_notification(order_id: int) -> None:
+    """
+    Планирует отправку Telegram-уведомления после
+    успешной фиксации заказа в базе данных.
+    """
+
+    def send_notification() -> None:
+        # Импорт выполняется здесь, чтобы снизить риск
+        # циклического импорта между приложениями.
+        from telegram_bot.services import notify_new_order
+
+        notify_new_order(order_id)
+
+    transaction.on_commit(
+        send_notification,
+        robust=True,
     )
 
 
@@ -68,14 +114,19 @@ def create_order(
     user,
     product,
 ) -> Order:
-    """Проверяет и сохраняет заказ."""
+    """
+    Проверяет данные, сохраняет заказ и планирует
+    отправку уведомления сотруднику через Telegram.
+    """
 
     if not is_shop_open():
+        open_time, close_time = get_shop_hours()
+
         raise ShopClosedError(
             "Сейчас магазин закрыт. "
-            f"Заказы принимаются с "
-            f"{settings.SHOP_OPEN_TIME} до "
-            f"{settings.SHOP_CLOSE_TIME}."
+            "Заказы принимаются с "
+            f"{open_time.strftime('%H:%M')} до "
+            f"{close_time.strftime('%H:%M')}."
         )
 
     if not product.is_available:
@@ -83,13 +134,30 @@ def create_order(
             "Выбранный товар больше недоступен."
         )
 
+    # Создаём объект Order из формы, но пока
+    # не сохраняем его в базе данных.
     order = form.save(commit=False)
 
+    # Эти поля определяются сервером и не должны
+    # передаваться покупателем через HTML-форму.
     order.user = user
     order.product = product
 
-    # Проверяет модель после добавления user и product.
+    # Проверяем модель после добавления пользователя
+    # и выбранного товара.
     order.full_clean()
+
+    # Сохраняем заказ в базе данных.
+    # После этой строки order.pk содержит ID заказа.
     order.save()
+
+    # Регистрируем Telegram-уведомление только тогда,
+    # когда отправка включена в настройках проекта.
+    if getattr(
+        settings,
+        "TELEGRAM_NOTIFICATIONS_ENABLED",
+        False,
+    ):
+        schedule_order_notification(order.pk)
 
     return order

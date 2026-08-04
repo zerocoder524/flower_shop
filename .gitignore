@@ -1,21 +1,30 @@
-# Виртуальное окружение
+# Виртуальные окружения
 .venv/
+venv/
+env/
 
 # Секретные настройки
 .env
 
 # Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 
 # Django
 db.sqlite3
-media/
-
-# Журналы
+*.sqlite3
 *.log
+
+# Демонстрационные изображения товаров
+media/*
+!media/products/
+!media/products/**
+
+# Тесты и покрытие
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Редакторы
 .idea/
@@ -23,4 +32,11 @@ media/
 
 # Windows
 Thumbs.db
-desktop.ini
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# Временные файлы
+*.tmp
+*.bak*.bak
